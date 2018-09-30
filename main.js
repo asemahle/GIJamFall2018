@@ -190,7 +190,7 @@ function main() {
                 player.update();
                 Engine.update(engine, 1000/60, 1);
 
-                if (player.dead && (Date.now() - player.deathTS > 1000)) {
+                if (player.dead && (Date.now() - player.deathTS > 3000)) {
                     loadCurrLevel(levelLoader);
                     player.dead = false;
                 }
