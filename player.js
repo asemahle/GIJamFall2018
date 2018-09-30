@@ -73,7 +73,6 @@ class Player {
 
         // process inputs to move body segments
         force = 0.005;
-
         var count = 0;
         for (let i = 1; i < this.colliders.length; i++) {
             let collider = this.colliders[i];
@@ -81,18 +80,6 @@ class Player {
             if (collider.isColliding && (Inp.up || Inp.down || Inp.right || Inp.left) && count < 5) {
                 count++;
                 Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: -Math.cos(segment.angle) * force, y: -Math.sin(segment.angle) * force})
-                // if (Inp.up) {
-                //     Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: 0, y: collider.wallCollision ? -force : 0});
-                // }
-                // if (Inp.left) {
-                //     Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: -force, y: 0});
-                // }
-                // if (Inp.right) {
-                //     Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: force, y: 0});
-                // }
-                // if (Inp.down) {
-                //     Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: 0, y: force});
-                // }
             }
         }
     }

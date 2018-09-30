@@ -41,6 +41,9 @@ var HEIGHT = 1600;
 var frameDeltas = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 var lastFrameTS = 0;
 
+var NUM_LEVELS = 4;
+var CURR_LEVEL = 1;
+
 
 function convertRange( value, r1, r2 ) {
     return ( value - r1[ 0 ] ) * ( r2[ 1 ] - r2[ 0 ] ) / ( r1[ 1 ] - r1[ 0 ] ) + r2[ 0 ];
@@ -108,7 +111,7 @@ function main() {
     var player = new Player({ engine: engine });
 
     var levelLoader = new LevelLoader({ engine: engine, player: player });
-    levelLoader.load('level4');
+    levelLoader.load('level' + CURR_LEVEL);
 
     Render.run(render);
 
@@ -127,8 +130,18 @@ function main() {
             Engine.update(engine, 1000/60, 1);
         }
         else if (player.win) {
-            console.log('You win!');
-            return;
+            if (CURR_LEVEL == NUM_LEVELS) {
+                console.log('You win!');
+                return;
+            }
+            else {
+                CURR_LEVEL++;
+                World.clear(this.engine.world);
+                player = new Player({ engine: engine });
+                levelLoader.player = player;
+                levelLoader.load('level' + CURR_LEVEL);
+            }
+
         }
         else if (levelLoader.crashed) {
             console.log('Exiting');
