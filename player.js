@@ -4,21 +4,23 @@ class Player {
         this.body = null;
         this.colliders = [];
         this.sectionMass = 0.1;
+        this.win = false;
     }
 
     addBody(obj) {
         var group = Body.nextGroup(true);
         var bodyCount = 0;
-        var snake = Composites.stack(obj.x, obj.y, 1, 25, 10, 10, (x, y) => {
+        var snake = Composites.stack(obj.x, obj.y, 1, 30, 10, 10, (x, y) => {
             bodyCount++;
-            return Bodies.rectangle(x - 20, y, 20, 15, {friction: 0.2, mass: bodyCount == 1 ? 0.1 : 0.01, frictionAir: bodyCount === 1 ? 0.015 : 0.015, collisionFilter: { group: group, category: 2 }, chamfer: 3 });
+            return Bodies.rectangle(x - 20, y, bodyCount === 1 ? 75 : 50 , bodyCount === 1 ? 30 : 20, {friction: 0.001, mass: bodyCount === 1 ? 10 : 0.7, frictionAir: bodyCount === 1 ? 0.015 : 0.015, collisionFilter: { group: group, category: 2 }, chamfer: 3 });
         });
         Composites.chain(snake, 0.3, 0, -0.3, 0, { stiffness: 1, length: 1, damping: 0.1, render: { type: 'line' } });
 
 
         this.colliders = [];
+        var first = true;
         for (let part of snake.bodies) {
-            var collider = Bodies.circle(part.position.x, part.position.y, 15, {
+            var collider = Bodies.circle(part.position.x, part.position.y, first ? 50 : 20, {
                 isStatic: true,
                 isSensor: true,
                 render: {
@@ -29,6 +31,7 @@ class Player {
             });
             collider.isCollider = true;
             this.colliders.push(collider);
+            first = false;
         }
         console.log(this.colliders);
 
@@ -45,15 +48,18 @@ class Player {
         Bounds.shift(render.bounds, {x: head.position.x - WIDTH / 2, y: head.position.y - HEIGHT / 2});
 
         // process inputs to move head
-        var force = numCollisions > 0
-            ? (0.15 / 3) * this.sectionMass
-            : (0.15 / 3) * this.sectionMass / 3;
-        var forceUp = numCollisions > 0
-            ? force
-            : force;
+        var force = 0.2 + convertRange(Math.min(numCollisions, 10), [0, 10], [0, 0.03 * 3]);
 
+        if (Inp.space) {
+            force *= 5;
+        }
+
+        let numKeysPressed = Inp.up + Inp.left + Inp.right + Inp.down;
+        if (numKeysPressed > 1) {
+            force *= (Math.sqrt(2) / 2);
+        }
         if (Inp.up) {
-            Body.applyForce( head, {x: head.position.x, y: head.position.y}, {x: 0, y: -forceUp});
+            Body.applyForce( head, {x: head.position.x, y: head.position.y}, {x: 0, y: -force});
         }
         if (Inp.left) {
             Body.applyForce( head, {x: head.position.x, y: head.position.y}, {x: -force, y: 0});
@@ -66,24 +72,27 @@ class Player {
         }
 
         // process inputs to move body segments
-        force = (0.001 / 3) * this.sectionMass;
-        for (let i = 0; i < this.colliders.length; i++) {
+        force = 0.005;
+
+        var count = 0;
+        for (let i = 1; i < this.colliders.length; i++) {
             let collider = this.colliders[i];
             let segment = this.body.bodies[i];
-            if (collider.isColliding || collider.lastCollision < 7) {
-
-                if (Inp.up) {
-                    Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: 0, y: -force*2});
-                }
-                if (Inp.left) {
-                    Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: -force, y: 0});
-                }
-                if (Inp.right) {
-                    Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: force, y: 0});
-                }
-                if (Inp.down) {
-                    Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: 0, y: force});
-                }
+            if (collider.isColliding && (Inp.up || Inp.down || Inp.right || Inp.left) && count < 5) {
+                count++;
+                Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: -Math.cos(segment.angle) * force, y: -Math.sin(segment.angle) * force})
+                // if (Inp.up) {
+                //     Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: 0, y: collider.wallCollision ? -force : 0});
+                // }
+                // if (Inp.left) {
+                //     Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: -force, y: 0});
+                // }
+                // if (Inp.right) {
+                //     Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: force, y: 0});
+                // }
+                // if (Inp.down) {
+                //     Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: 0, y: force});
+                // }
             }
         }
     }
@@ -103,7 +112,18 @@ class Player {
                     if (collision.collided) {
                         collider.lastCollision = 0;
                         collider.isColliding = true;
+                        collider.wallCollision = Math.abs(collision.normal.y) < 0.5;
                         collider.render.strokeStyle = "#c80008";
+
+                        if (collider.wallCollision) {
+                            collider.render.strokeStyle = "#0cc824";
+                        }
+                    }
+                }
+                if (body.isGoal) {
+                    let collision = Matter.SAT.collides(body, collider);
+                    if (collision.collided) {
+                        this.win = true;
                     }
                 }
             }

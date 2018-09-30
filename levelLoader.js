@@ -35,6 +35,11 @@ class LevelLoader {
                 bodies.push(this.player.body);
                 bodies = bodies.concat(this.player.colliders);
             }
+            else if ((obj.properties || {}).isGoal) {
+                var body = Bodies.rectangle(obj.x + obj.width/2, obj.y + obj.height/2, obj.width, obj.height, {isStatic: true, friction: 0.2, chamfer: { radius: 25 },});
+                body.isGoal = true;
+                bodies.push(body);
+            }
             else {
                 var body = Bodies.rectangle(obj.x + obj.width/2, obj.y + obj.height/2, obj.width, obj.height, {isStatic: true, friction: 0.2, chamfer: { radius: 25 },});
                 body.isWall = true;
