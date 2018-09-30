@@ -1,9 +1,41 @@
 canvas {
-    transform: scale(0.5);
+    transform: scale(0.4);
     transform-origin: top left;
 }
 
 * {
     overflow-x: hidden;
     overflow-y: hidden;
+}
+
+#hidden {
+    transform: none;
+    display: none;
+}
+
+#controlcontainer {
+    position: relative;
+    height: 0;
+    z-index: 500;
+    overflow-x: visible;
+    overflow-y: visible;
+}
+
+#menucontainer {
+    background: black;
+}
+
+.overlay {
+    position: relative;
+    width: 800px;
+    height: 800px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.shadow {
+    color: whitesmoke;
+    text-shadow: rgb(0, 0, 0) 0.1em 0.1em 0.2em, rgb(0, 0, 0) 0.1em 0.1em 0.2em, rgb(0, 0, 0) 0.1em 0.1em 0.2em
 }

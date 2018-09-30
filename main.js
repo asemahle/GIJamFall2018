@@ -7,8 +7,10 @@ var SPACE = 32;
 
 // game states
 var state = 0;
-var STATE_DEBUG = 0;
-var STATE_LOAD_LEVEL = 1;
+var STATE_MENU = 0;
+var STATE_PLAY = 1;
+var STATE_WIN = 2;
+var STATE_DIE = 3;
 
 // input state
 var Inp = {
@@ -22,6 +24,7 @@ var Inp = {
 var player;
 var render;
 var engine;
+var levelLoader;
 
 // module aliases
 var Engine = Matter.Engine,
@@ -35,14 +38,14 @@ var Engine = Matter.Engine,
     Bounds = Matter.Bounds,
     Events = Matter.Events;
 
-var WIDTH = 1600;
-var HEIGHT = 1600;
+var WIDTH = 2000;
+var HEIGHT = 2000;
 
 var frameDeltas = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 var lastFrameTS = 0;
 
-var NUM_LEVELS = 4;
-var CURR_LEVEL = 1;
+var NUM_LEVELS = 7;
+var CURR_LEVEL = 6;
 
 
 function convertRange( value, r1, r2 ) {
@@ -92,10 +95,61 @@ function initInput() {
     }
 }
 
+function loadCurrLevel() {
+    World.clear(this.engine.world);
+    player = new Player({ engine: engine });
+    levelLoader.player = player;
+    levelLoader.load('level' + CURR_LEVEL);
+}
+
+function startFromMenu() {
+    CURR_LEVEL = parseInt($('#levelSelect').val());
+    toState(STATE_PLAY);
+}
+
+function toMenu() {
+    toState(STATE_MENU);
+}
+
+function toNextLevel() {
+    CURR_LEVEL++;
+    toState(STATE_PLAY);
+}
+
+function toState(newState) {
+    let oldState = state;
+
+    // to menu
+    if (newState === STATE_MENU) {
+        $('#menucontainer').show();
+    }
+    // win level
+    else if (state === STATE_PLAY && newState === STATE_WIN) {
+        if (CURR_LEVEL !== NUM_LEVELS) {
+            $('#nextlvlcontainer').show();
+        }
+        else {
+            $('#wincontainer').show();
+        }
+    }
+    // start nxt level
+    else if (newState === STATE_PLAY) {
+        state = newState;
+
+        $('.lvloverlay').hide();
+        $('#' + CURR_LEVEL).show();
+        $('.overlay').hide();
+        loadCurrLevel();
+    }
+    else {
+        throw('Unhandled state transition');
+    }
+}
+
 function main() {
     engine = Engine.create();
     render = Render.create({
-        element: document.body,
+        element: $('.container')[0],
         engine: engine,
         options: {
             width: WIDTH,
@@ -106,14 +160,19 @@ function main() {
         }
     });
 
-
     initInput();
-    var player = new Player({ engine: engine });
+    player = new Player({ engine: engine });
 
-    var levelLoader = new LevelLoader({ engine: engine, player: player });
+    levelLoader = new LevelLoader({ engine: engine, player: player });
     levelLoader.load('level' + CURR_LEVEL);
 
     Render.run(render);
+
+    // var customRenderer = new Renderer({ levelLoader: levelLoader, player: player, width: WIDTH, height: HEIGHT });
+    // customRenderer.init();
+    // Events.on(render, 'afterRender', () => {
+    //     customRenderer.update();
+    // });
 
     // game loop
     function draw(){
@@ -125,28 +184,28 @@ function main() {
         document.getElementById("fps").innerHTML = String(Math.floor(fpsAvg));
 
         // logic
-        if (!levelLoader.isLoading && !player.win) {
-            player.update();
-            Engine.update(engine, 1000/60, 1);
-        }
-        else if (player.win) {
-            if (CURR_LEVEL == NUM_LEVELS) {
-                console.log('You win!');
+
+        if (state === STATE_PLAY) {
+            if (!levelLoader.isLoading && !player.win) {
+                player.update();
+                Engine.update(engine, 1000/60, 1);
+
+                if (player.dead && (Date.now() - player.deathTS > 1000)) {
+                    loadCurrLevel(levelLoader);
+                    player.dead = false;
+                }
+            }
+            else if (player.win) {
+                toState(STATE_WIN);
+
+            }
+            else if (levelLoader.crashed) {
+                console.log('Exiting');
                 return;
             }
-            else {
-                CURR_LEVEL++;
-                World.clear(this.engine.world);
-                player = new Player({ engine: engine });
-                levelLoader.player = player;
-                levelLoader.load('level' + CURR_LEVEL);
-            }
+        }
 
-        }
-        else if (levelLoader.crashed) {
-            console.log('Exiting');
-            return;
-        }
+
 
         // loop!
         requestAnimationFrame(draw);

@@ -5,6 +5,7 @@ class LevelLoader {
         this.player = params.player;
         this.isLoading = false;
         this.crashed = false;
+        this.data = null;
     }
 
     load(filename) {
@@ -15,6 +16,7 @@ class LevelLoader {
             console.log('Success loading level: ' + filename);
             console.log(data);
 
+            this.data = data;
             this.populateWorld(data);
 
             this.isLoading = false;
@@ -36,13 +38,40 @@ class LevelLoader {
                 bodies = bodies.concat(this.player.colliders);
             }
             else if ((obj.properties || {}).isGoal) {
-                var body = Bodies.rectangle(obj.x + obj.width/2, obj.y + obj.height/2, obj.width, obj.height, {isStatic: true, friction: 0.2, chamfer: { radius: 25 },});
+                let body = Bodies.rectangle(obj.x + obj.width/2, obj.y + obj.height/2, obj.width, obj.height, {isStatic: true, friction: 0.2, chamfer: { radius: 25 },});
+                body.render.strokeStyle = "#0cc824";
+                body.render.lineWidth = 40;
+                body.render.fillStyle = "#000";
                 body.isGoal = true;
                 bodies.push(body);
             }
+            else if ((obj.properties || {}).noClimb) {
+                let body = Bodies.rectangle(obj.x + obj.width/2, obj.y + obj.height/2, obj.width, obj.height, {isStatic: true, friction: 0.0, chamfer: { radius: 25 },});
+                body.render.strokeStyle = "#05eafa";
+                body.render.lineWidth = 40;
+                body.noClimb = true;
+                bodies.push(body);
+            }
+            else if ((obj.properties || {}).lava) {
+                let body = Bodies.rectangle(obj.x + obj.width/2, obj.y + obj.height/2, obj.width, obj.height, {isStatic: true, isSensor:true, friction: 0.0, chamfer: { radius: 25 },});
+                body.render.strokeStyle = "#fa1505";
+                body.render.lineWidth = 40;
+                body.render.fillStyle = "#fa1505";
+                body.isLava = true;
+                bodies.push(body);
+            }
+            else if ((obj.properties || {}).fake) {
+                let body = Bodies.rectangle(obj.x + obj.width/2, obj.y + obj.height/2, obj.width, obj.height, {isStatic: true, isSensor:true, friction: 0.0, chamfer: { radius: 25 },});
+                body.render.lineWidth = 40;
+                body.render.strokeStyle = body.render.fillStyle;
+                body.fake = true;
+                bodies.push(body);
+            }
             else {
-                var body = Bodies.rectangle(obj.x + obj.width/2, obj.y + obj.height/2, obj.width, obj.height, {isStatic: true, friction: 0.2, chamfer: { radius: 25 },});
+                let body = Bodies.rectangle(obj.x + obj.width/2, obj.y + obj.height/2, obj.width, obj.height, {isStatic: true, friction: 0.2, chamfer: { radius: 25 },});
                 body.isWall = true;
+                body.render.lineWidth = 40;
+                body.render.strokeStyle = body.render.fillStyle;
                 bodies.push(body);
             }
         }

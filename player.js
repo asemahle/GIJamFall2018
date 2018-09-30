@@ -5,14 +5,15 @@ class Player {
         this.colliders = [];
         this.sectionMass = 0.1;
         this.win = false;
+        this.dead = false;
     }
 
     addBody(obj) {
         var group = Body.nextGroup(true);
         var bodyCount = 0;
-        var snake = Composites.stack(obj.x, obj.y, 1, 30, 10, 10, (x, y) => {
+        var snake = Composites.stack(obj.x, obj.y, 1, 30, 5, 0, (x, y) => {
             bodyCount++;
-            return Bodies.rectangle(x - 20, y, bodyCount === 1 ? 75 : 50 , bodyCount === 1 ? 30 : 20, {friction: 0.001, mass: bodyCount === 1 ? 10 : 0.7, frictionAir: bodyCount === 1 ? 0.015 : 0.015, collisionFilter: { group: group, category: 2 }, chamfer: 3 });
+            return Bodies.rectangle(x - 20, y, bodyCount === 1 ? 75 : 65 , bodyCount === 1 ? 50 : 20, {friction: 0.2, mass: bodyCount === 1 ? 10 : 0.7, frictionAir: bodyCount === 1 ? 0.015 : 0.015, collisionFilter: { group: group, category: 2 }, chamfer: 3 });
         });
         Composites.chain(snake, 0.3, 0, -0.3, 0, { stiffness: 1, length: 1, damping: 0.1, render: { type: 'line' } });
 
@@ -47,12 +48,12 @@ class Player {
         // track player
         Bounds.shift(render.bounds, {x: head.position.x - WIDTH / 2, y: head.position.y - HEIGHT / 2});
 
+        if (this.dead) return;
+
+
         // process inputs to move head
         var force = 0.2 + convertRange(Math.min(numCollisions, 10), [0, 10], [0, 0.03 * 3]);
 
-        if (Inp.space) {
-            force *= 5;
-        }
 
         let numKeysPressed = Inp.up + Inp.left + Inp.right + Inp.down;
         if (numKeysPressed > 1) {
@@ -72,12 +73,12 @@ class Player {
         }
 
         // process inputs to move body segments
-        force = 0.005;
+        force = 0.01;
         var count = 0;
         for (let i = 1; i < this.colliders.length; i++) {
             let collider = this.colliders[i];
             let segment = this.body.bodies[i];
-            if (collider.isColliding && (Inp.up || Inp.down || Inp.right || Inp.left) && count < 5) {
+            if (collider.isColliding && (Inp.up || Inp.down || Inp.right || Inp.left) && count < 5 && Inp.space) {
                 count++;
                 Body.applyForce( segment, {x: segment.position.x, y: segment.position.y}, {x: -Math.cos(segment.angle) * force, y: -Math.sin(segment.angle) * force})
             }
@@ -86,8 +87,10 @@ class Player {
 
     updateColliders() {
         for (let i = 0; i < this.body.bodies.length; i++) {
-            var part = this.body.bodies[i];
-            var collider = this.colliders[i];
+            let part = this.body.bodies[i];
+            let collider = this.colliders[i];
+            let constraint = this.body.constraints[i] || null;
+
             Body.setPosition(collider, { x: part.position.x, y: part.position.y });
 
             collider.isColliding = false;
@@ -107,7 +110,15 @@ class Player {
                         }
                     }
                 }
-                if (body.isGoal) {
+                if (body.isLava && i < 25) {
+                    let collision = Matter.SAT.collides(body, collider);
+                    if (collision.collided && constraint) {
+                        Body.applyForce( part, {x: part.position.x, y: part.position.y}, {x: 0, y: -3});
+                        this.dead = true;
+                        this.deathTS = Date.now();
+                    }
+                }
+                if (body.isGoal && !this.dead) {
                     let collision = Matter.SAT.collides(body, collider);
                     if (collision.collided) {
                         this.win = true;

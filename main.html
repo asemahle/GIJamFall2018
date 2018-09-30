@@ -7,13 +7,103 @@
             src="https://code.jquery.com/jquery-3.3.1.min.js"
             integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
             crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="matter.js"></script>
     <script src="player.js"></script>
+    <script src="renderer.js"></script>
     <script src="levelLoader.js"></script>
     <script src="main.js"></script>
     <link rel="stylesheet" href="main.css">
 </head>
 <body onload="main()">
-<div>FPS: <span id="fps"></span></div>
+<div class="container">
+    <h1 class="bd-title">Janky Snake</h1>
+    <p class="bd-lead">Move head with ARROW KEYS, and slither with SPACE. Get to the goal at the end of each level to win!</p>
+    <div>FPS: <span id="fps"></span></div>
+
+
+    <div id="controlcontainer">
+        <div id="menucontainer" class="overlay">
+            <div class="form" id="menu">
+                <div class="form-group">
+                    <button type="button" class="btn btn-success" style="width: 200px; height: 120px;" onclick="startFromMenu()"><h2>Start</h2></button>
+                </div>
+                <div class="form-group">
+                    <label for="levelSelect" style="color:whitesmoke">Level</label>
+                    <select class="form-control" id="levelSelect">
+                        <option value="0">1 - Intro</option>
+                        <option value="1">2 - Slither</option>
+                        <option value="2">3 - Stairs</option>
+                        <option value="3">4 - Red Hot</option>
+                        <option value="4">5 - Chasm</option>
+                        <option value="5">6 - Little Climb</option>
+                        <option value="6">7 - Big Climb</option>
+                        <option value="7">8 - Over And Out</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div id="nextlvlcontainer" class="overlay">
+            <div class="form">
+                <h2 class="shadow">SUCCESS!</h2>
+                <div class="form-group">
+                    <button type="button" class="btn btn-success" style="width: 200px; height: 120px;" onclick="toNextLevel()"><h2>Next Level</h2></button>
+                </div>
+            </div>
+        </div>
+        <div id="wincontainer" class="overlay">
+            <div class="form">
+                <h2 class="shadow">YOU WIN! <br>ALL LEVELS COMPLETE! <br>YOU ARE NOW A SNAKE!</h2>
+                <div class="form-group">
+                    <button type="button" class="btn btn-success" style="width: 300px; height: 120px;" onclick="toMenu()"><h2>Back To Menu</h2></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="0" class="lvloverlay">
+            <div class="form">
+                <h2 class="shadow">Use ARROW KEYS to move your head! <br>Touch GREEN to WIN!</h2>
+            </div>
+        </div>
+        <div id="1" class="lvloverlay">
+            <div class="form">
+                <h2 class="shadow">Press SPACE to SLITHER! <br> Go RIGHT young snake ---></h2>
+            </div>
+        </div>
+        <div id="2" class="lvloverlay">
+            <div class="form">
+                <h2 class="shadow">CLIMB! (ﾉ◕ヮ◕)ﾉ*:・ﾟ✧</h2>
+            </div>
+        </div>
+        <div id="3" class="lvloverlay">
+            <div class="form">
+                <h2 class="shadow">Red === Hot. No touch. ◕_◕</h2>
+            </div>
+        </div>
+        <div id="4" class="lvloverlay">
+            <div class="form">
+                <h2 class="shadow">There is a chasm. Dangerous to cross. <br>BE CAREFUL (⊙＿⊙')</h2>
+            </div>
+        </div>
+        <div id="5" class="lvloverlay">
+            <div class="form">
+                <h2 class="shadow">Time to climb. UP! (๑•́ ヮ •̀๑) <br> Use SPACE CAREFULLY! <br>You are more STICKY WITHOUT IT!</h2>
+            </div>
+        </div>
+        <div id="6" class="lvloverlay">
+            <div class="form">
+                <h2 class="shadow">BIG CLIMB. <br>YOU CAN DO IT! ᕦ(òᴥó)ᕥ</h2>
+            </div>
+        </div>
+        <div id="7" class="lvloverlay">
+            <div class="form">
+                <h2 class="shadow">This is it. <br>Only a true snake can pass 🐍 ◕_◕ 🐍</h2>
+            </div>
+        </div>
+
+    </div>
+
+</div>
 </body>
 </html>
