@@ -147,6 +147,10 @@ function toState(newState) {
 }
 
 function main() {
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
+        $('body')[0].innerHTML = "<h1>Not Supported :(</h1><p>Sorry, not supported on mobile devices</p>"
+    }
+
     engine = Engine.create();
     render = Render.create({
         element: $('.container')[0],
