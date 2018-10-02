@@ -47,7 +47,7 @@ class LevelLoader {
             }
             else if ((obj.properties || {}).noClimb) {
                 let body = Bodies.rectangle(obj.x + obj.width/2, obj.y + obj.height/2, obj.width, obj.height, {isStatic: true, friction: 0.0, chamfer: { radius: 25 },});
-                body.render.strokeStyle = "#05eafa";
+                body.render.strokeStyle = body.render.fillStyle;
                 body.render.lineWidth = 40;
                 body.noClimb = true;
                 bodies.push(body);
@@ -65,6 +65,14 @@ class LevelLoader {
                 body.render.lineWidth = 40;
                 body.render.strokeStyle = body.render.fillStyle;
                 body.fake = true;
+                bodies.push(body);
+            }
+            else if ((obj.properties || {}).fakeLava) {
+                let body = Bodies.rectangle(obj.x + obj.width/2, obj.y + obj.height/2, obj.width, obj.height, {isStatic: true, isSensor:true, friction: 0.0, chamfer: { radius: 25 },});
+                body.render.strokeStyle = "#fa1505";
+                body.render.lineWidth = 40;
+                body.render.fillStyle = "#fa1505";
+                body.fakeLava = true;
                 bodies.push(body);
             }
             else {

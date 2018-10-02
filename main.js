@@ -164,6 +164,7 @@ function main() {
         $('body')[0].innerHTML = "<h1>Not Supported :(</h1><p>Sorry, not supported on mobile devices</p>"
     }
 
+
     engine = Engine.create();
     render = Render.create({
         element: $('.container')[0],
@@ -204,7 +205,16 @@ function main() {
                 player.update();
                 Engine.update(engine, 1000/60, 1);
 
+                if (player.dead) {
+                    if (!$('#death').hasClass('flashing')) {
+                        $('#death').show();
+                        $('#death').addClass('flashing');
+                        $("#death").fadeOut(1000);
+                    }
+                }
                 if (player.dead && (Date.now() - player.deathTS > 2000)) {
+                    $('#death').removeClass('flashing');
+                    $('#death').hide();
                     loadCurrLevel(levelLoader);
                     player.dead = false;
                 }

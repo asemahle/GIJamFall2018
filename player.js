@@ -94,7 +94,7 @@ class Player {
             Body.setPosition(collider, { x: part.position.x, y: part.position.y });
 
             collider.isColliding = false;
-            collider.render.strokeStyle = "#c8c2c7";
+            collider.render.strokeStyle = 'transparent';
 
             for (let body of this.engine.world.bodies) {
                 if (body.isWall) {
@@ -103,11 +103,6 @@ class Player {
                         collider.lastCollision = 0;
                         collider.isColliding = true;
                         collider.wallCollision = Math.abs(collision.normal.y) < 0.5;
-                        collider.render.strokeStyle = "#c80008";
-
-                        if (collider.wallCollision) {
-                            collider.render.strokeStyle = "#0cc824";
-                        }
                     }
                 }
                 if (body.isLava && i < 25) {
