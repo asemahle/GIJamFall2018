@@ -172,12 +172,6 @@ function main() {
 
     Render.run(render);
 
-    // var customRenderer = new Renderer({ levelLoader: levelLoader, player: player, width: WIDTH, height: HEIGHT });
-    // customRenderer.init();
-    // Events.on(render, 'afterRender', () => {
-    //     customRenderer.update();
-    // });
-
     // game loop
     function draw(){
         // display fps
