@@ -146,6 +146,19 @@ function toState(newState) {
     }
 }
 
+function resizeCanvas() {
+    let windowHeight = $(window).height();
+    let canvasTop = $('canvas').offset().top;
+    let spaceToFill = windowHeight - (canvasTop + 10);
+    let transformBy = spaceToFill / HEIGHT;
+
+    let canvasCss = `canvas { transform: scale(${transformBy}) }`;
+    let overlayCss = `.overlay { width: ${spaceToFill}px; height: ${spaceToFill}px }`;
+
+    $('#dynamicStyle').remove();
+    $(`<style type='text/css' id='dynamicStyle'> ${canvasCss} ${overlayCss} </style>`).appendTo("head");
+}
+
 function main() {
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
         $('body')[0].innerHTML = "<h1>Not Supported :(</h1><p>Sorry, not supported on mobile devices</p>"
@@ -171,6 +184,9 @@ function main() {
     levelLoader.load('level' + CURR_LEVEL);
 
     Render.run(render);
+
+    resizeCanvas();
+    $(window).resize(resizeCanvas);
 
     // game loop
     function draw(){
